@@ -1,5 +1,6 @@
 use std::{
     collections::HashSet,
+    fmt::{Debug, Display},
     fs::read_dir,
     io::Error,
     path::{Path, PathBuf},
@@ -24,6 +25,35 @@ struct CrawlResults {
     directories_searched: u64,
     file_types: HashSet<String>,
     total_size: u64,
+}
+
+impl Display for CrawlResults {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let mut size = 0;
+        let mut size_unit = "";
+        if self.total_size < 1000 {
+            size = self.total_size;
+            size_unit = "bytes";
+        } else if self.total_size < 10_000 {
+            size = self.total_size / 1000;
+            size_unit = "kb";
+        } else if self.total_size < 10_000_000 {
+            size = self.total_size / 1_000_000;
+            size_unit = "mb";
+        } else if self.total_size < 10_000_000_000 {
+            size = self.total_size / 1_000_000_000;
+            size_unit = "gb";
+        }
+        write!(
+            f,
+            "Found {} files in {} sub-directories.\n{} file types.\nDirectory size: {}{}",
+            self.files_found,
+            self.directories_searched,
+            self.file_types.len(),
+            size,
+            size_unit
+        )
+    }
 }
 
 #[derive(Default)]
@@ -75,9 +105,9 @@ impl Crawler {
             }
         }
 
-        println!("{:?}", crawl_results);
         let duration = start.elapsed();
         println!("Took {:?} long", duration);
+        println!("{}", crawl_results);
         Ok(())
     }
 

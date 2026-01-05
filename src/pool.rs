@@ -46,7 +46,7 @@ impl Drop for ThreadPool {
         drop(self.sender.take());
 
         for worker in &mut self.workers.drain(..) {
-            println!("ThreadPool: Shutting down worker {}", worker.id);
+            // println!("ThreadPool: Shutting down worker {}", worker.id);
             worker.handle.join().unwrap();
         }
     }
@@ -63,7 +63,7 @@ impl Worker {
         reciever: Arc<Mutex<Receiver<Job>>>,
         res_sender: Sender<Result<DirectoryCrawl, Error>>,
     ) -> Self {
-        println!("Creating worker {id}");
+        // println!("Creating worker {id}");
         let handle = thread::spawn(move || {
             let sender = res_sender;
             loop {
@@ -76,7 +76,7 @@ impl Worker {
                         sender.send(res).unwrap();
                     }
                     Err(_) => {
-                        println!("Worker {id} disconnected; Shutting down!");
+                        // println!("Worker {id} disconnected; Shutting down!");
                         break;
                     }
                 }
